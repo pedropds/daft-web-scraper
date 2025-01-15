@@ -2,7 +2,8 @@
 .idea/
 
 # sbt target directory
-.target/
+target/
+project/
 
 # Eclipse project settings (if applicable)
 .project
