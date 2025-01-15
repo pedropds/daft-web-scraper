@@ -1,0 +1,12 @@
+# IntelliJ IDEA project settings
+.idea/
+
+# sbt target directory
+.target/
+
+# Eclipse project settings (if applicable)
+.project
+.classpath
+
+# IntelliJ specific files
+*.iml
