@@ -23,7 +23,7 @@ object DaftPlaceCache {
   import CacheJsonProtocol.*
 
   // Ensure the cache folder exists
-  private val cacheFolder = new File("cache")
+  private val cacheFolder = new File(".cache")
   if (!cacheFolder.exists()) {
     cacheFolder.mkdir() // Create the folder if it doesn't exist
   }
