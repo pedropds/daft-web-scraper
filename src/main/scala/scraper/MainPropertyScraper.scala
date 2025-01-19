@@ -1,9 +1,12 @@
-import sttp.client3._
+package scraper
+
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
-import scala.jdk.CollectionConverters._
+import sttp.client3.*
 
-object WebScraper {
+import scala.jdk.CollectionConverters.*
+
+object MainPropertyScraper {
   // Fetches the HTML content of a URL
   private def fetchHtml(url: String): Either[String, String] = {
     val backend = HttpURLConnectionBackend()
