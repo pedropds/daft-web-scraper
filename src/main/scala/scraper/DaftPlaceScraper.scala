@@ -10,7 +10,6 @@ import scraper.PlaceJsonProtocol.{jsonFormat13, jsonFormat4}
 import spray.json.*
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.util.{Failure, Success}
 
 // Define JSON case classes
 case class PropertyCount(

@@ -1,9 +1,6 @@
-import akka.actor.ActorSystem
-import akka.stream.SystemMaterializer
-import scraper.{DaftPlaceScraper, Place}
+import scraper.Place
 
 import scala.util.{Failure, Success}
-import scala.concurrent.{ExecutionContext, Future, Promise}
 import scala.concurrent.ExecutionContext
 import service.DaftPlaceService
 import scala.concurrent.ExecutionContext.Implicits.global
