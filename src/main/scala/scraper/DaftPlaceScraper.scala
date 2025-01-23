@@ -6,7 +6,7 @@ import akka.http.scaladsl.model.*
 import akka.http.scaladsl.model.headers.*
 import akka.http.scaladsl.unmarshalling.Unmarshal
 import akka.stream.SystemMaterializer
-import scraper.PlaceJsonProtocol.{jsonFormat13, jsonFormat4}
+import scraper.PlaceJsonProtocol.jsonFormat13
 import spray.json.*
 
 import scala.concurrent.{ExecutionContext, Future}
@@ -29,17 +29,41 @@ case class PropertyCount(
                         )
 
 case class Place(
+                  sequentialId: Int,
                   id: String,
                   displayName: String,
                   displayValue: String,
                   propertyCount: PropertyCount
                 )
 
-
 // JSON Protocol for Spray JSON
 object PlaceJsonProtocol extends DefaultJsonProtocol {
   implicit val propertyCountFormat: RootJsonFormat[PropertyCount] = jsonFormat13(PropertyCount.apply)
-  implicit val placeFormat: RootJsonFormat[Place] = jsonFormat4(Place.apply)
+
+  implicit val placeFormat: RootJsonFormat[Place] = new RootJsonFormat[Place] {
+    override def read(json: JsValue): Place = {
+      json.asJsObject.getFields("id", "displayName", "displayValue", "propertyCount") match {
+        case Seq(JsString(id), JsString(displayName), JsString(displayValue), propertyCount) =>
+          Place(
+            id = id,
+            displayName = displayName,
+            displayValue = displayValue,
+            propertyCount = propertyCount.convertTo[PropertyCount],
+            sequentialId = 0 // Temporary, will be assigned dynamically later
+          )
+        case _ =>
+          throw DeserializationException("Place JSON is malformed or missing fields")
+      }
+    }
+
+    override def write(place: Place): JsValue = JsObject(
+      "id" -> JsString(place.id),
+      "displayName" -> JsString(place.displayName),
+      "displayValue" -> JsString(place.displayValue),
+      "propertyCount" -> place.propertyCount.toJson,
+      "sequentialId" -> JsNumber(place.sequentialId)
+    )
+  }
 }
 
 object DaftPlaceScraper {
@@ -70,7 +94,8 @@ object DaftPlaceScraper {
       )
       .flatMap { response =>
         Unmarshal(response.entity).to[String].map { responseJson =>
-          responseJson.parseJson.convertTo[List[Place]]
+          val places = responseJson.parseJson.convertTo[List[Place]]
+          assignSequentialIds(places)
         }
       }
       .recoverWith {
@@ -78,4 +103,12 @@ object DaftPlaceScraper {
           Future.failed(new RuntimeException(s"Error fetching areas: ${ex.getMessage}", ex))
       }
   }
+
+  // Assign sequential IDs after deserialization
+  private def assignSequentialIds(places: List[Place]): List[Place] = {
+    places.zipWithIndex.map { case (place, index) =>
+      place.copy(sequentialId = index + 1)
+    }
+  }
+
 }

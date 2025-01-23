@@ -14,18 +14,22 @@ import scala.util.{Failure, Success}
 // Coordinator service to fetch places
 object DaftPlaceService {
 
-  // Method to get Places
-  def getPlaces(query: String): Future[List[Place]] = {
-    // Set up an ActorSystem and ExecutionContext
-    implicit val system: ActorSystem = ActorSystem("DaftScraperSystem")
-    implicit val materializer: SystemMaterializer = SystemMaterializer(system)
-    implicit val ec: ExecutionContext = system.dispatcher // Implicit ExecutionContext
+  def getPlacesByScrapingDaft(query: String): List[Place] = {
+    Await.result(scrapePlacesFromDaft(query), 10.second)
+  }
 
+  // Method to get Places
+  private def scrapePlacesFromDaft(query: String): Future[List[Place]] = {
     if (DaftPlaceCache.isCacheValid) {
       // If cache is valid, return cached data
       Future.successful(DaftPlaceCache.readCache)
     } else {
       // If cache is not valid, scrape from the web
+      // Set up an ActorSystem and ExecutionContext
+      implicit val system: ActorSystem = ActorSystem("DaftScraperSystem")
+      implicit val materializer: SystemMaterializer = SystemMaterializer(system)
+      implicit val ec: ExecutionContext = system.dispatcher // Implicit ExecutionContext
+
       fetchPlacesFromWeb(query).andThen {
         case _ =>
           // After fetching, cache the result
