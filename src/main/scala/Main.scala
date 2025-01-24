@@ -1,6 +1,5 @@
-import scraper.{MainPropertyScraper, Place}
-import service.TerminalService
-import service.DaftPlaceService
+import scraper.{DaftPropertyScraper, Place}
+import service.{DaftPlaceService, DaftPropertyService, TerminalService}
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 object Main {
@@ -19,9 +18,14 @@ object Main {
     // Start the interactive filtering and selection process
     val filteredPlaces: List[Place] = TerminalService.interactiveFilterAndSelectPlaces(places)
 
-    val searchUrl = MainPropertyScraper.createDaftUrl(filteredPlaces)
+    val searchUrl = DaftPropertyScraper.createDaftUrl(filteredPlaces)
 
     println(searchUrl)
+
+    val properties = DaftPropertyService.getProperties(searchUrl)
+
+    //println(properties)
+    println(properties.size)
   }
 
 }

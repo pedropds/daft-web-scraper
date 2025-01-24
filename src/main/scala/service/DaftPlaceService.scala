@@ -12,7 +12,7 @@ import scala.concurrent.duration._
 import scala.util.{Failure, Success}
 
 // Coordinator service to fetch places
-object DaftPlaceService {
+object DaftPlaceService extends DaftServiceTrait {
 
   def getPlacesByScrapingDaft(query: String): List[Place] = {
     Await.result(scrapePlacesFromDaft(query), 10.second)
@@ -63,13 +63,5 @@ object DaftPlaceService {
 
     // Only shutdown after all operations are complete
     shutdown()
-  }
-
-  // Shutdown method that requires ExecutionContext to handle Future completion
-  private def shutdown()(implicit system: ActorSystem, ec: ExecutionContext): Unit = {
-    system.terminate().onComplete {
-      case Success(_) => println("ActorSystem terminated successfully.")
-      case Failure(error) => println(s"Failed to terminate ActorSystem: ${error.getMessage}")
-    }
   }
 }
