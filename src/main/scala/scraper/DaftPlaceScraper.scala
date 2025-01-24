@@ -42,15 +42,28 @@ object PlaceJsonProtocol extends DefaultJsonProtocol {
 
   implicit val placeFormat: RootJsonFormat[Place] = new RootJsonFormat[Place] {
     override def read(json: JsValue): Place = {
-      json.asJsObject.getFields("id", "displayName", "displayValue", "propertyCount") match {
+      json.asJsObject.getFields("id", "displayName", "displayValue", "propertyCount", "sequentialId") match {
+        // Case where `sequentialId` exists in the JSON
+        case Seq(JsString(id), JsString(displayName), JsString(displayValue), propertyCount, JsNumber(sequentialId)) =>
+          Place(
+            id = id,
+            displayName = displayName,
+            displayValue = displayValue,
+            propertyCount = propertyCount.convertTo[PropertyCount],
+            sequentialId = sequentialId.toInt
+          )
+
+        // Case where `sequentialId` is missing in the JSON
         case Seq(JsString(id), JsString(displayName), JsString(displayValue), propertyCount) =>
           Place(
             id = id,
             displayName = displayName,
             displayValue = displayValue,
             propertyCount = propertyCount.convertTo[PropertyCount],
-            sequentialId = 0 // Temporary, will be assigned dynamically later
+            sequentialId = 0 // Default value if not present
           )
+
+        // Malformed JSON
         case _ =>
           throw DeserializationException("Place JSON is malformed or missing fields")
       }

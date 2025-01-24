@@ -1,4 +1,4 @@
-import scraper.Place
+import scraper.{MainPropertyScraper, Place}
 import service.TerminalService
 import service.DaftPlaceService
 
@@ -14,10 +14,14 @@ object Main {
       return
     }
 
-    // Start the interactive filtering and selection process
     println(s"Found ${places.length} places. Starting interactive session...")
 
-    TerminalService.interactiveFilterAndSelectPlaces(places)
+    // Start the interactive filtering and selection process
+    val filteredPlaces: List[Place] = TerminalService.interactiveFilterAndSelectPlaces(places)
+
+    val searchUrl = MainPropertyScraper.createDaftUrl(filteredPlaces)
+
+    println(searchUrl)
   }
 
 }

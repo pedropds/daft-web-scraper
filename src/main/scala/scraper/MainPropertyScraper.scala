@@ -1,38 +1,24 @@
 package scraper
 
-import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
-import sttp.client3.*
-
-import scala.jdk.CollectionConverters.*
 
 object MainPropertyScraper {
-  // Fetches the HTML content of a URL
-  private def fetchHtml(url: String): Either[String, String] = {
-    val backend = HttpURLConnectionBackend()
-    val request = basicRequest.get(uri"$url")
-    val response = request.send(backend)
-    response.body
-  }
+  def createDaftUrl(selectedPlaces: List[Place]): String = {
+    // base url for daft renting properties
+    val baseUrl = "https://www.daft.ie/property-for-rent"
 
-  // Parses the HTML and extracts the page title
-  private def extractTitle(html: String): String = {
-    val doc: Document = Jsoup.parse(html)
-    doc.title()
-  }
-
-  // Extracts links from the HTML as a List of tuples (href, text)
-  private def extractLinks(html: String): List[(String, String)] = {
-    val doc: Document = Jsoup.parse(html)
-    doc.select("a[href]").asScala.toList.map(link => (link.attr("href"), link.text()))
-  }
-
-  // Performs the entire scrape process and returns structured data
-  def scrape(url: String): Either[String, (String, List[(String, String)])] = {
-    fetchHtml(url).map { html =>
-      val title = extractTitle(html)
-      val links = extractLinks(html)
-      (title, links)
+    selectedPlaces match {
+      case Nil =>
+        throw new IllegalArgumentException("No places selected. Cannot construct URL.")
+      case List(singlePlace) =>
+        // Single place: Append the place's `displayValue` to the base URL
+        s"$baseUrl/${singlePlace.displayValue.replace(" ", "-").toLowerCase}"
+      case multiplePlaces =>
+        // Multiple places: Use the base URL and add query parameters for each location
+        val queryParams = multiplePlaces.map { place =>
+          s"location=${place.displayValue.replace(" ", "-").toLowerCase}"
+        }.mkString("&")
+        s"$baseUrl/ireland?$queryParams"
     }
+    
   }
 }
