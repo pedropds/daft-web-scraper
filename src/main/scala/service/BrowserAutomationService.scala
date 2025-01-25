@@ -2,14 +2,22 @@ package service
 
 import org.openqa.selenium.{By, WebDriver}
 import org.openqa.selenium.chrome.ChromeDriver
+import util.EnvLoader
 
 import java.time.Duration
 
 object BrowserAutomationService {
 
   def sendEmailToProperty(propertyLink: String): Unit = {
-    // Set up the ChromeDriver (ensure you have the right driver installed)
-    System.setProperty("webdriver.chrome.driver", "/opt/homebrew/bin/chromedriver")
+    // Load environment variables
+    val env = EnvLoader.loadEnv()
+    val chromeDriverPath = env("CHROME_DRIVER_PATH") // Get the value from the .env file
+
+    if(chromeDriverPath == null || chromeDriverPath.isEmpty)
+      throw RuntimeException("Chrome Driver path is null or empty")
+
+    // Set up the ChromeDriver
+    System.setProperty("webdriver.chrome.driver", chromeDriverPath)
     val driver: WebDriver = new ChromeDriver()
 
     try {
@@ -22,7 +30,7 @@ object BrowserAutomationService {
       // Step 2: Click the email button
       val emailButton = driver.findElement(By.cssSelector("button[data-testid='message-btn']"))
       emailButton.click()
-      Thread.sleep(1500) // Add a 1-second delay
+      Thread.sleep(1000) // Add a 1-second delay
 
       // Step 3: Paste text into input boxes
       val emailInput = driver.findElement(By.id("email-input-id")) // Replace with actual ID
