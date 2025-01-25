@@ -1,5 +1,5 @@
 import scraper.{DaftPropertyScraper, Place}
-import service.{DaftPlaceService, DaftPropertyService, TerminalService}
+import service.{BrowserAutomationService, DaftPlaceService, DaftPropertyService, TerminalService}
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 object Main {
@@ -26,6 +26,11 @@ object Main {
 
     //println(properties)
     println(properties.size)
+
+    // find first property in list
+    val property = properties.find(p => 1 == 1).get
+
+    BrowserAutomationService.sendEmailToProperty(property)
   }
 
 }
