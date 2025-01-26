@@ -99,7 +99,7 @@ object DaftPropertyScraper {
 
             // If the fromValue is lower than previousFrom, stop the loop
             previousFrom match {
-              case Some(prev) if fromValue < prev =>
+              case Some(prev) if fromValue < prev || fromValue == prev =>
                 println("Reached a previously visited page, stopping pagination.")
                 Future.successful(accumulatedLinks ++ propertyLinks) // Return accumulated links and stop
               case _ =>
