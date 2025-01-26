@@ -28,9 +28,9 @@ object Main {
     println(properties.size)
 
     // find first property in list
-    val property = properties.find(p => 1 == 1).get
+    // val property = properties.find(p => 1 == 1).get
 
-    BrowserAutomationService.sendEmailToProperty(property)
+    // BrowserAutomationService.sendEmailToProperty(property)
   }
 
 }

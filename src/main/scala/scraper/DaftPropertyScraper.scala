@@ -5,40 +5,77 @@ import akka.http.scaladsl.Http
 import akka.http.scaladsl.model.*
 
 import scala.concurrent.{ExecutionContext, Future}
-import scala.jdk.CollectionConverters._
+import scala.jdk.CollectionConverters.*
 import org.jsoup.Jsoup
 import org.jsoup.nodes.Document
 import org.jsoup.select.Elements
-import scala.util.{Failure, Success}
 
 import scala.concurrent.duration.*
 
 object DaftPropertyScraper {
 
+  var minPrice: Option[Int] = None
+  var maxPrice: Option[Int] = None
+
   private val PageSize = 20 // Number of results per page
 
   def createDaftUrl(selectedPlaces: List[Place]): String = {
-    // base url for daft renting properties
+    // Base URL for Daft renting properties
     val baseUrl = "https://www.daft.ie/property-for-rent"
 
-    selectedPlaces match {
+    // Construct location parameters based on the number of selected places
+    val locationPath = selectedPlaces match {
       case Nil =>
         throw new IllegalArgumentException("No places selected. Cannot construct URL.")
       case List(singlePlace) =>
         // Single place: Append the place's `displayValue` to the base URL
-        s"$baseUrl/${singlePlace.displayValue.replace(" ", "-").toLowerCase}"
+        singlePlace.displayValue.replace(" ", "-").toLowerCase
+      case _ =>
+        // Multiple places: No path change, we add locations in query parameters
+        "ireland"
+    }
+
+    // Build query parameters for locations
+    val locationParams = selectedPlaces match {
+      case Nil | List(_) =>
+        "" // No location parameters for single place; it's part of the path
       case multiplePlaces =>
-        // Multiple places: Use the base URL and add query parameters for each location
-        val queryParams = multiplePlaces.map { place =>
+        // For multiple places, generate location query parameters
+        multiplePlaces.map { place =>
           s"location=${place.displayValue.replace(" ", "-").toLowerCase}"
         }.mkString("&")
-        s"$baseUrl/ireland?$queryParams"
+    }
+
+    // Build query parameters for price range if they exist
+    val priceParams = Seq(
+      minPrice.map(price => s"rentalPrice_from=$price"),
+      maxPrice.map(price => s"rentalPrice_to=$price")
+    ).flatten.mkString("&")
+
+    // Combine location and price query parameters
+    val allQueryParams = Seq(locationParams, priceParams).filter(_.nonEmpty).mkString("&")
+
+    // Construct the final URL
+    if (selectedPlaces.length == 1) {
+      // Single place: Append query parameters with "?" if present
+      if (allQueryParams.nonEmpty) s"$baseUrl/$locationPath?$allQueryParams"
+      else s"$baseUrl/$locationPath"
+    } else {
+      // Multiple places: Append query parameters with "?"
+      s"$baseUrl/$locationPath?$allQueryParams"
     }
   }
 
   def fetchPropertyLinks(baseUrl: String)(implicit system: ActorSystem, ec: ExecutionContext): Future[List[String]] = {
     val pageSize = 20
-    val currentUrl = s"$baseUrl?pageSize=$pageSize&from=0" // Starting URL
+
+    // Check if the base URL already contains a '?'
+    val currentUrl = if (baseUrl.contains("?")) {
+      s"$baseUrl&pageSize=$pageSize&from=0"
+    } else {
+      s"$baseUrl?pageSize=$pageSize&from=0"
+    }
+
     var previousFrom: Option[Int] = None // To store the last `from` value
     val accumulatedLinks: List[String] = List.empty // To accumulate the property links
 
@@ -70,7 +107,12 @@ object DaftPropertyScraper {
                 previousFrom = Some(fromValue)
 
                 // Construct the next page URL with `pageSize=20` and the correct `from`
-                val nextPageUrl = s"$baseUrl?pageSize=$pageSize&from=$fromValue"
+                val nextPageUrl = if (baseUrl.contains("?")) {
+                  s"$baseUrl&pageSize=$pageSize&from=$fromValue"
+                } else {
+                  s"$baseUrl?pageSize=$pageSize&from=$fromValue"
+                }
+
                 println(s"Fetching next page: $nextPageUrl")
 
                 // Continue to the next page by chaining the future
@@ -89,6 +131,7 @@ object DaftPropertyScraper {
     // Start the process from the base URL
     processPages(currentUrl)
   }
+
 
   private def extractLinks(document: Document): List[String] = {
     val baseUrl = "https://www.daft.ie"

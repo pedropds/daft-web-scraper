@@ -3,13 +3,11 @@ package service
 import akka.actor.ActorSystem
 import akka.stream.SystemMaterializer
 
-import scala.concurrent.{ExecutionContext, Future}
-import cache.DaftPlaceCache
-import scraper.{DaftPlaceScraper, DaftPropertyScraper, Place}
+import scala.concurrent.ExecutionContext
+import scraper.DaftPropertyScraper
 
 import scala.concurrent.Await
 import scala.concurrent.duration.*
-import scala.util.{Failure, Success}
 
 // Coordinator service to fetch places
 object DaftPropertyService extends DaftServiceTrait{

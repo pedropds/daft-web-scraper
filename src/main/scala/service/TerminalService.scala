@@ -1,17 +1,18 @@
 package service
 
-import scraper.Place
+import scraper.{DaftPropertyScraper, Place}
+
 import scala.io.StdIn
 import scala.annotation.tailrec
 
 object TerminalService {
-  
+
   @tailrec
   def interactiveFilterAndSelectPlaces(
                                           originalPlaces: List[Place],
                                           filteredPlaces: List[Place] = Nil,
                                           chosenPlaces: List[Place] = Nil,
-                                          currentPage: Int = 1
+                                          currentPage: Int = 1,
                                         ): List[Place] = {
     val placesToShow = if (filteredPlaces.nonEmpty) filteredPlaces else originalPlaces
     val totalPages = (placesToShow.length + 19) / 20 // 20 places per page
@@ -36,7 +37,8 @@ object TerminalService {
     println("3. De-select places by numbers (comma-separated)")
     println("4. Clear filters")
     println("5. Navigate pages (n for next, p for previous)")
-    println("6. Finish selection and return chosen places")
+    println("6. Select minimum and maximum place")
+    println("7. Finish selection and return chosen places")
 
     print("\nChoose an option: ")
     StdIn.readLine().trim match {
@@ -114,6 +116,20 @@ object TerminalService {
         }
 
       case "6" =>
+        print("Enter minimum price (leave blank for no minimum): ")
+        val min = StdIn.readLine().trim
+        DaftPropertyScraper.minPrice = if (min.nonEmpty) Some(min.toInt) else None
+
+        print("Enter maximum price (leave blank for no maximum): ")
+        val max = StdIn.readLine().trim
+        DaftPropertyScraper.maxPrice = if (max.nonEmpty) Some(max.toInt) else None
+
+        println(s"Price filter applied: Min = €${DaftPropertyScraper.minPrice.getOrElse("None")}, " +
+          s"Max = €${DaftPropertyScraper.maxPrice.getOrElse("None")}")
+        
+        interactiveFilterAndSelectPlaces(originalPlaces, filteredPlaces, chosenPlaces, currentPage)
+
+      case "7" =>
         println("Finishing selection...")
         println("\nChosen places:")
         chosenPlaces.foreach(place => println(s"- ${place.displayName}"))
