@@ -1,5 +1,10 @@
 # Daft Web Scraper
 
+## Educational and Personal Use Disclaimer
+This project is purely educational and intended for personal use only. 
+It is not to be used for commercial purposes, nor should it be used to scrape large volumes of data from Daft.ie or any other website in violation of their terms of service. 
+Please ensure that you comply with all applicable laws and the terms of use of any websites you interact with.
+
 ## Project Overview
 
 The **Daft Web Scraper** is a Scala-based project designed to fetch and filter rental property listings from the [Daft.ie](https://www.daft.ie) website. The application allows users to interactively search, filter, and select properties based on various criteria, such as location, price range, and number of bedrooms. Results are fetched and displayed with options to export property information to a file.
@@ -161,8 +166,3 @@ Ensure that the `from` parameter logic correctly tracks page state.
 - Integration with other property websites.
 
 ---
-
-## License
-
-This project is licensed under the MIT License. See the `LICENSE` file for details.
-
