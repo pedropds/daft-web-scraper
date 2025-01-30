@@ -38,7 +38,8 @@ object TerminalService {
     println("4. Clear filters")
     println("5. Navigate pages (n for next, p for previous)")
     println("6. Select minimum and maximum place")
-    println("7. Finish selection and return chosen places")
+    println("7. Select minimum and maximum beds")
+    println("8. Finish selection and return chosen places")
 
     print("\nChoose an option: ")
     StdIn.readLine().trim match {
@@ -130,6 +131,20 @@ object TerminalService {
         interactiveFilterAndSelectPlaces(originalPlaces, filteredPlaces, chosenPlaces, currentPage)
 
       case "7" =>
+        print("Enter minimum beds (leave blank for no minimum): ")
+        val min = StdIn.readLine().trim
+        DaftPropertyScraper.minBed = if (min.nonEmpty) Some(min.toInt) else None
+
+        print("Enter maximum beds (leave blank for no maximum): ")
+        val max = StdIn.readLine().trim
+        DaftPropertyScraper.maxBed = if (max.nonEmpty) Some(max.toInt) else None
+
+        println(s"Beds filter applied: Min = €${DaftPropertyScraper.minBed.getOrElse("None")}, " +
+          s"Max = €${DaftPropertyScraper.maxBed.getOrElse("None")}")
+
+        interactiveFilterAndSelectPlaces(originalPlaces, filteredPlaces, chosenPlaces, currentPage)
+
+      case "8" =>
         println("Finishing selection...")
         println("\nChosen places:")
         chosenPlaces.foreach(place => println(s"- ${place.displayName}"))

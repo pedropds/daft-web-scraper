@@ -1,5 +1,7 @@
 import scraper.{DaftPropertyScraper, Place}
-import service.{BrowserAutomationService, DaftPlaceService, DaftPropertyService, TerminalService}
+import service.{DaftPlaceService, DaftPropertyService, TerminalService}
+
+import java.io.{BufferedWriter, FileWriter}
 
 //TIP To <b>Run</b> code, press <shortcut actionId="Run"/> or click the <icon src="AllIcons.Actions.Execute"/> icon in the gutter.
 object Main {
@@ -22,15 +24,26 @@ object Main {
 
     println(searchUrl)
 
-    val properties = DaftPropertyService.getProperties(searchUrl)
+    val properties: List[String] = DaftPropertyService.getProperties(searchUrl)
 
     //println(properties)
     println(properties.size)
 
-    // find first property in list
-    // val property = properties.find(p => 1 == 1).get
+    // Write properties to a file
+    val outputFile = "properties_list.txt"
+    val writer = new BufferedWriter(new FileWriter(outputFile))
 
-    // BrowserAutomationService.sendEmailToProperty(property)
+    try {
+      properties.foreach { property =>
+        writer.write(property)
+        writer.newLine()
+      }
+      println(s"Properties successfully written to $outputFile")
+    } catch {
+      case e: Exception => println(s"Error writing to file: ${e.getMessage}")
+    } finally {
+      writer.close()
+    }
   }
 
 }

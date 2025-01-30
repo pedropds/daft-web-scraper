@@ -17,6 +17,9 @@ object DaftPropertyScraper {
   var minPrice: Option[Int] = None
   var maxPrice: Option[Int] = None
 
+  var minBed: Option[Int] = None
+  var maxBed: Option[Int] = None
+
   private val PageSize = 20 // Number of results per page
 
   def createDaftUrl(selectedPlaces: List[Place]): String = {
@@ -47,13 +50,15 @@ object DaftPropertyScraper {
     }
 
     // Build query parameters for price range if they exist
-    val priceParams = Seq(
+    val queryParams = Seq(
       minPrice.map(price => s"rentalPrice_from=$price"),
-      maxPrice.map(price => s"rentalPrice_to=$price")
+      maxPrice.map(price => s"rentalPrice_to=$price"),
+      minBed.map(bed => s"numBeds_from=$bed"),
+      maxBed.map(bed => s"numBeds_to=$bed")
     ).flatten.mkString("&")
 
     // Combine location and price query parameters
-    val allQueryParams = Seq(locationParams, priceParams).filter(_.nonEmpty).mkString("&")
+    val allQueryParams = Seq(locationParams, queryParams).filter(_.nonEmpty).mkString("&")
 
     // Construct the final URL
     if (selectedPlaces.length == 1) {
