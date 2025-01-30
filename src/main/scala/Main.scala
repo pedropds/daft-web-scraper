@@ -38,7 +38,7 @@ object Main {
         writer.write(property)
         writer.newLine()
       }
-      println(s"Properties successfully written to $outputFile")
+      println(s"\n\nProperties successfully written to $outputFile\n\n")
     } catch {
       case e: Exception => println(s"Error writing to file: ${e.getMessage}")
     } finally {
