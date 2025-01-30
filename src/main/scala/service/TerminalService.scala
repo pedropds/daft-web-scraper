@@ -14,6 +14,8 @@ object TerminalService {
                                           chosenPlaces: List[Place] = Nil,
                                           currentPage: Int = 1,
                                         ): List[Place] = {
+    clearTerminal()
+
     val placesToShow = if (filteredPlaces.nonEmpty) filteredPlaces else originalPlaces
     val totalPages = (placesToShow.length + 19) / 20 // 20 places per page
     val pagedPlaces = placesToShow.slice((currentPage - 1) * 20, currentPage * 20)
@@ -154,5 +156,9 @@ object TerminalService {
         println("Invalid option. Please try again.")
         interactiveFilterAndSelectPlaces(originalPlaces, filteredPlaces, chosenPlaces, currentPage)
     }
+  }
+
+  private def clearTerminal(): Unit = {
+    print("\u001b[2J")
   }
 }
